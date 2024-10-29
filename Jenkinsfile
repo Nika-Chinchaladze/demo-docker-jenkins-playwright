@@ -9,18 +9,17 @@ pipeline {
             }
         }
         stage('Build and Run Tests') {
-            agent {
-                docker {
-                    image 'mcr.microsoft.com/playwright:v1.48.2-jammy'
-                    args '-u root:root' // Run as root to avoid permission issues
-                }
-            }
             steps {
-                // Install dependencies inside the Docker container
-                sh 'npm install'
-                
-                // Run the Playwright tests
-                sh 'npx playwright test'
+                script {
+                    // Run the tests inside a Docker container
+                    docker.image('mcr.microsoft.com/playwright:v1.48.2-jammy').inside {
+                        // Install dependencies inside the Docker container
+                        sh 'npm install'
+                        
+                        // Run the Playwright tests
+                        sh 'npx playwright test'
+                    }
+                }
             }
         }
     }
