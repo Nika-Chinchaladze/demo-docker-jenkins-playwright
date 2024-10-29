@@ -1,36 +1,36 @@
 pipeline {
-    agent any
-
-    stages {
-        stage('Checkout') {
-            steps {
-                // Checkout your code
-                git 'https://your-repository-url.git' // Replace with your repo URL
-            }
-        }
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    // Build the Docker image
-                    def image = docker.build("playwright-tests", "-f Dockerfile .")
-                }
-            }
-        }
-        stage('Run Tests') {
-            steps {
-                script {
-                    // Run the tests in the Docker container
-                    docker.image("mcr.microsoft.com/playwright:v1.48.2-jammy").inside {
-                        sh 'npx playwright test' // Run the Playwright tests
-                    }
-                }
-            }
-        }
+  agent { 
+    docker { 
+      image 'mcr.microsoft.com/playwright:v1.48.2-jammy'
+    } 
+  }
+  stages {
+    stage('install playwright') {
+      steps {
+        sh '''
+          npm i -D @playwright/test
+          npx playwright install
+        '''
+      }
     }
-    post {
-        always {
-            // Clean up after the build
-            cleanWs()
-        }
+    stage('help') {
+      steps {
+        sh 'npx playwright test --help'
+      }
     }
+    stage('test') {
+      steps {
+        sh '''
+          npx playwright test --list
+          npx playwright test
+        '''
+      }
+      post {
+        success {
+          archiveArtifacts(artifacts: 'homepage-*.png', followSymlinks: false)
+          sh 'rm -rf *.png'
+        }
+      }
+    }
+  }
 }
