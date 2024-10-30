@@ -4,23 +4,26 @@ pipeline {
         CI = 'true'
     }
     stages {
-        stage('Install Dependencies') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    bat 'npm install'
-                    bat 'npx playwright install --with-deps'
+                    sh 'docker build -t my-playwright-image .'
                 }
             }
         }
-        stage('Run Tests') {
+        stage('Run Tests in Docker') {
             steps {
-                bat 'npx playwright test'
+                script {
+                    sh 'docker run --rm my-playwright-image'
+                }
             }
         }
     }
     post {
         always {
             cleanWs()
+            sh 'docker system prune -f'
         }
     }
 }
+
