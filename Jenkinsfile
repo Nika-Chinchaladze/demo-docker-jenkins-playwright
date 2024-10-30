@@ -4,25 +4,29 @@ pipeline {
         CI = 'true'
     }
     stages {
-        stage('Build Docker Image') {
+        stage('Install Dependencies') {
             steps {
                 script {
-                    sh 'docker build -t my-playwright-image .'
+                    bat 'rmdir /S /Q node_modules'
+                    bat 'npm install'
                 }
+                bat 'npm install'
             }
         }
-        stage('Run Tests in Docker') {
+        stage('Run Tests') {
             steps {
-                script {
-                    sh 'docker run --rm my-playwright-image'
+                bat 'npx playwright test'
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'test-results/**/*', allowEmptyArchive: true
                 }
             }
         }
     }
     post {
         always {
-            deleteDir()
+            cleanWs()
         }
     }
 }
-
