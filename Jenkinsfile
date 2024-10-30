@@ -8,6 +8,7 @@ pipeline {
             steps {
                 script {
                     bat 'npm install'
+                    bat 'npx playwright install --with-deps'
                 }
             }
         }
