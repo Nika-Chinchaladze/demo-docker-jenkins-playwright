@@ -7,13 +7,19 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 script {
-                    sh 'npm install'
+                    bat 'rmdir /S /Q node_modules'
                 }
+                bat 'npm install'
             }
         }
         stage('Run Tests') {
             steps {
-                sh 'npx playwright test'
+                bat 'npx playwright test'
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'test-results/**/*', allowEmptyArchive: true
+                }
             }
         }
     }
@@ -23,4 +29,3 @@ pipeline {
         }
     }
 }
-
