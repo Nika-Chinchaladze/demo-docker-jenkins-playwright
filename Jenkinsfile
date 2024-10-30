@@ -7,7 +7,6 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 script {
-                    bat 'rmdir /S /Q node_modules'
                     bat 'npm install'
                 }
                 bat 'npm install'
